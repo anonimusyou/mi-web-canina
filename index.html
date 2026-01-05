@@ -11,5 +11,82 @@
     <script nomodule="">!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
     <script nomodule="" crossorigin="" id="vite-legacy-polyfill" src="./assets/polyfills-legacy-BvkVsKI2.js"></script>
     <script nomodule="" crossorigin="" id="vite-legacy-entry" data-src="./assets/index-legacy-CgeBpaR0.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
-  
+
+<!-- ✅ FIX FORMSPREE (añadido) -->
+<script>
+/*
+  Formspree hotfix (sin rebuild):
+  - añade action/method al formulario de contacto
+  - añade name="..." a los campos para que Formspree reciba los datos
+*/
+(function () {
+  const FORMSPREE = "https://formspree.io/f/mzdzwqww";
+
+  function apply() {
+    const contact = document.querySelector("#contact");
+    if (!contact) return false;
+
+    const form = contact.querySelector("form");
+    if (!form) return false;
+
+    form.setAttribute("action", FORMSPREE);
+    form.setAttribute("method", "POST");
+    form.setAttribute("accept-charset", "UTF-8");
+
+    const labelMap = {
+      "Nombre": "name",
+      "Correo Electrónico": "email",
+      "Teléfono": "phone",
+      "Mensaje": "message",
+    };
+
+    const labels = form.querySelectorAll("label");
+    labels.forEach((label) => {
+      const key = (label.textContent || "").trim();
+      const fieldName = labelMap[key];
+      if (!fieldName) return;
+
+      const container = label.closest("div");
+      let field =
+        (container && container.querySelector("input, textarea, select")) ||
+        null;
+
+      if (!field) {
+        field =
+          label.parentElement &&
+          label.parentElement.querySelector("input, textarea, select");
+      }
+
+      if (field) field.setAttribute("name", fieldName);
+    });
+
+    if (!form.querySelector('input[name="_subject"]')) {
+      const s = document.createElement("input");
+      s.type = "hidden";
+      s.name = "_subject";
+      s.value = "Nuevo contacto desde Educa Dog";
+      form.appendChild(s);
+    } 
+      
+    if (!form.querySelector('input[name="_next"]')) {
+      const n = document.createElement("input");
+      n.type = "hidden";
+      n.name = "_next";
+      n.value = window.location.href.split("#")[0] + "#contact";
+      form.appendChild(n);
+    }
+
+    return true;
+  }
+
+  if (!apply()) {
+    window.addEventListener("load", apply);
+  }
+
+  const obs = new MutationObserver(() => apply());
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+<!-- ✅ /FIX FORMSPREE -->
+
 </body></html>
